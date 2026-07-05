@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-07-05
+
+- Add `lock-lost-updates` (CRITICAL): read-modify-write without atomic
+  UPDATE or row lock silently loses concurrent writes
+- Add `lock-for-no-key-update` (MEDIUM-HIGH): FOR UPDATE blocks FK
+  checks' FOR KEY SHARE; use the weakest sufficient row-lock mode
+
 ## 1.1.1 — 2026-07-05
 
 - Add `tests/check_skill.py`: validates frontmatter keys, impact enum,
