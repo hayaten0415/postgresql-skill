@@ -3,7 +3,7 @@ name: postgres-review
 description: Review SQL queries, schema definitions, and migrations against PostgreSQL best practices. Use this skill when asked to review database-related code — "review this migration", "このスキーマをレビュー", "check this query", or a diff touching SQL files, migrations, or ORM schema definitions — to find performance, security, and correctness issues. Not for writing new SQL from scratch; use a generation skill for that.
 license: MIT
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
   derived-from: https://github.com/supabase/agent-skills (supabase-postgres-best-practices, MIT)
   abstract: PostgreSQL code-review skill backed by performance rules across 6 categories, prioritized by impact from critical (query performance, connection management) to medium (data access patterns). Each rule includes incorrect vs. correct SQL examples used to detect and fix violations.
 ---

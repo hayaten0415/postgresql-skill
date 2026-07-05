@@ -52,4 +52,17 @@ When to partition:
 - Time-series data with date-based queries
 - Need to efficiently drop old data
 
+Adding an index to an already-partitioned live table needs a special sequence —
+`create index concurrently` does not work on the parent (see
+`schema-migration-locks.md`):
+
+```sql
+-- 1. build on each partition without blocking writes
+create index concurrently events_2024_01_created_idx on events_2024_01 (created_at);
+-- 2. create an invalid parent index without touching partitions
+create index events_created_idx on only events (created_at);
+-- 3. attach each partition index; parent becomes valid when all are attached
+alter index events_created_idx attach partition events_2024_01_created_idx;
+```
+
 Reference: [Table Partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)

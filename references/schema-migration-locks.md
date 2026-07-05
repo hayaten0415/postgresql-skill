@@ -52,7 +52,10 @@ alter table orders alter column note set not null;  -- uses the validated check,
 alter table orders drop constraint orders_note_not_null;
 ```
 
-The same two-step `not valid` / `validate` pattern applies to foreign keys. Other
+The same two-step `not valid` / `validate` pattern applies to foreign keys. On
+partitioned tables, `create index concurrently` cannot target the parent: build
+the index concurrently on each partition, create it on the parent with `on only`,
+then `attach` each partition index (see `schema-partitioning.md`). Other
 rewrite traps to flag in migration review: `alter column ... type` rewrites the
 whole table under `ACCESS EXCLUSIVE` (add a new column and backfill in batches
 instead), and `add column ... default` with a *volatile* default does too. If

@@ -24,6 +24,12 @@ ln -s /path/to/postgresql-skill ~/.claude/skills/postgres-review
 
 Then ask Claude Code to review a migration, schema, or query diff.
 
+## Checks
+
+`python3 tests/check_skill.py` validates rule-file structure (frontmatter keys,
+impact enum, naming, example blocks). `tests/trigger_cases.yaml` lists prompts
+and which skill should fire when a generation skill is installed alongside.
+
 ## Attribution
 
 Rule catalog derived from

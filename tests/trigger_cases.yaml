@@ -1,0 +1,35 @@
+# Trigger routing cases: postgres-review vs. a SQL *generation* skill.
+#
+# Context: when installed alongside a generation-oriented skill whose
+# description also contains "reviewing" (e.g. supabase-postgres-best-practices:
+# "writing, reviewing, or optimizing"), these prompts define which skill
+# SHOULD fire. Verify manually by typing each prompt in a session with both
+# skills installed and checking which skill Claude invokes.
+#
+# expect: postgres-review | generation
+
+cases:
+  - prompt: "このマイグレーションをレビューして"
+    expect: postgres-review
+
+  - prompt: "Review this migration before I deploy it"
+    expect: postgres-review
+
+  - prompt: "この diff の SQL に問題ないか見てもらえる?"
+    expect: postgres-review
+
+  - prompt: "注文テーブルのスキーマを設計して"
+    expect: generation
+
+  - prompt: "Write a query that returns monthly revenue per customer"
+    expect: generation
+
+  - prompt: "このクエリ遅いんだけど"
+    expect: postgres-review
+    notes: >
+      Boundary case, decided deliberately: diagnosing an EXISTING query is
+      review territory — the sargability, index, and plan rules are exactly
+      the diagnostic criteria. Rewriting the query afterwards may hand off
+      to a generation skill. If this prompt fires the generation skill in
+      practice, tighten this skill's description (e.g. add "slow query" /
+      "クエリが遅い" trigger phrases) rather than accepting the misroute.
