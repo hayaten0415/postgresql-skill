@@ -38,13 +38,18 @@ set app.current_user_id = '123';
 select * from orders;  -- Only returns orders for user 123
 ```
 
-Policy for authenticated role:
+Scope policies to specific roles where possible:
 
 ```sql
+-- Applies only to the application role, not owners or migration roles
 create policy orders_user_policy on orders
   for all
-  to authenticated
-  using (user_id = auth.uid());
+  to app_user
+  using (user_id = (select current_setting('app.current_user_id')::bigint));
 ```
+
+On managed platforms the caller's identity often comes from a platform function
+instead of a session setting (e.g. Supabase's `auth.uid()`); the policy patterns
+are the same.
 
 Reference: [Row Security Policies](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)

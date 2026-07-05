@@ -13,23 +13,28 @@ Poorly written RLS policies can cause severe performance issues. Use subqueries 
 
 ```sql
 create policy orders_policy on orders
-  using (auth.uid() = user_id);  -- auth.uid() called per row!
+  using (current_setting('app.current_user_id')::bigint = user_id);
+  -- evaluated for every row!
 
--- With 1M rows, auth.uid() is called 1M times
+-- With 1M rows, the function is called 1M times
 ```
 
 **Correct (wrap functions in SELECT):**
 
 ```sql
 create policy orders_policy on orders
-  using ((select auth.uid()) = user_id);  -- Called once, cached
+  using ((select current_setting('app.current_user_id')::bigint) = user_id);
+  -- InitPlan: evaluated once, result reused for the whole scan
 
 -- 100x+ faster on large tables
 ```
 
+The same wrap-in-`select` trick applies to platform identity functions on
+managed services (e.g. Supabase's `auth.uid()`).
+
 Use security definer functions for complex checks:
 
-`SECURITY DEFINER` functions run with the creator's privileges and bypass RLS on any tables they touch — which is what makes them useful for internal lookups, but also what makes them dangerous if misused. Always include an explicit `auth.uid()` check inside the function body, keep them in a non-exposed schema, and revoke `EXECUTE` from any role that shouldn't call them directly.
+`SECURITY DEFINER` functions run with the creator's privileges and bypass RLS on any tables they touch — which is what makes them useful for internal lookups, but also what makes them dangerous if misused. Always include an explicit check of the calling user's identity inside the function body, keep them in a non-exposed schema, and revoke `EXECUTE` from any role that shouldn't call them directly.
 
 ```sql
 -- Create helper function in a private schema
@@ -42,12 +47,13 @@ as $$
   select exists (
     select 1 from public.team_members
     -- always check the calling user's identity inside the function
-    where team_id = $1 and user_id = (select auth.uid())
+    where team_id = $1
+      and user_id = (select current_setting('app.current_user_id')::bigint)
   );
 $$;
 
--- Revoke direct execution from public roles
-revoke execute on function private.is_team_member(bigint) from PUBLIC, anon, authenticated, service_role;
+-- Revoke direct execution from roles that shouldn't call it
+revoke execute on function private.is_team_member(bigint) from public;
 
 -- Use in policy (indexed lookup, not per-row check)
 create policy team_orders_policy on orders
