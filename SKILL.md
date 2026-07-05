@@ -5,7 +5,7 @@ license: MIT
 metadata:
   version: "1.0.0"
   derived-from: https://github.com/supabase/agent-skills (supabase-postgres-best-practices, MIT)
-  abstract: PostgreSQL code-review skill backed by performance rules across 8 categories, prioritized by impact from critical (query performance, connection management) to incremental (advanced features). Each rule includes incorrect vs. correct SQL examples used to detect and fix violations.
+  abstract: PostgreSQL code-review skill backed by performance rules across 6 categories, prioritized by impact from critical (query performance, connection management) to medium (data access patterns). Each rule includes incorrect vs. correct SQL examples used to detect and fix violations.
 ---
 
 # PostgreSQL Review
@@ -33,9 +33,7 @@ Run this review when the change under review touches:
    | 3 | Security & RLS | CRITICAL | `security-` | RLS policies, GRANT/REVOKE, roles |
    | 4 | Schema Design | HIGH | `schema-` | CREATE/ALTER TABLE, types, constraints |
    | 5 | Concurrency & Locking | MEDIUM-HIGH | `lock-` | transactions, UPDATE contention, queues |
-   | 6 | Data Access Patterns | MEDIUM | `data-` | loops issuing queries, bulk writes, pagination |
-   | 7 | Monitoring & Diagnostics | LOW-MEDIUM | `monitor-` | perf investigation, VACUUM/ANALYZE |
-   | 8 | Advanced Features | LOW | `advanced-` | JSONB, full-text search |
+   | 6 | Data Access Patterns | MEDIUM-HIGH | `data-` | loops issuing queries, pagination |
 
 3. **Read the matching rule files** in `references/` (e.g. a new foreign key → `schema-foreign-key-indexes.md`; a query in a loop → `data-n-plus-one.md`). Read every rule in an applicable category, not just the obvious one — adjacent rules often catch subtler issues.
 
