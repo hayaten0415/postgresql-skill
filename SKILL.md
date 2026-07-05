@@ -3,9 +3,9 @@ name: postgres-review
 description: Review SQL queries, schema definitions, and migrations against PostgreSQL best practices. Use this skill when asked to review database-related code — "review this migration", "このスキーマをレビュー", "check this query", or a diff touching SQL files, migrations, or ORM schema definitions — to find performance, security, and correctness issues. Not for writing new SQL from scratch; use a generation skill for that.
 license: MIT
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
   derived-from: https://github.com/supabase/agent-skills (supabase-postgres-best-practices, MIT)
-  abstract: PostgreSQL code-review skill backed by performance rules across 6 categories, prioritized by impact from critical (query performance, connection management) to medium (data access patterns). Each rule includes incorrect vs. correct SQL examples used to detect and fix violations.
+  abstract: PostgreSQL code-review skill backed by rules across 6 categories. Each rule carries its own impact level (CRITICAL, HIGH, or MEDIUM-HIGH) in its frontmatter and includes incorrect vs. correct SQL examples used to detect and fix violations.
 ---
 
 # PostgreSQL Review
@@ -24,18 +24,20 @@ Run this review when the change under review touches:
 
 1. **Scope the change.** Identify what the diff or target files touch: new tables, new queries, index changes, RLS policies, connection setup, etc. If no target was given, review the pending diff (`git diff` / staged changes); otherwise review the files or SQL the user pointed at.
 
-2. **Select applicable rule categories.** Map what the change touches to categories by filename prefix, highest priority first:
+2. **Select applicable rule categories.** Map what the change touches to categories by filename prefix:
 
-   | Priority | Category | Impact | Prefix | Applies when the change involves |
-   |----------|----------|--------|--------|----------------------------------|
-   | 1 | Query Performance | CRITICAL | `query-` | SELECT/JOIN/WHERE, indexes |
-   | 2 | Connection Management | CRITICAL | `conn-` | pool config, client setup, serverless |
-   | 3 | Security & RLS | CRITICAL | `security-` | RLS policies, GRANT/REVOKE, roles |
-   | 4 | Schema Design | HIGH | `schema-` | CREATE/ALTER TABLE, types, constraints |
-   | 5 | Concurrency & Locking | MEDIUM-HIGH | `lock-` | transactions, UPDATE contention, queues |
-   | 6 | Data Access Patterns | MEDIUM-HIGH | `data-` | loops issuing queries, bulk writes, pagination |
+   | Category | Prefix | Applies when the change involves |
+   |----------|--------|----------------------------------|
+   | Query Performance | `query-` | SELECT/JOIN/WHERE, indexes |
+   | Connection Management | `conn-` | pool config, client setup, serverless |
+   | Security & RLS | `security-` | RLS policies, GRANT/REVOKE, roles, SECURITY DEFINER |
+   | Schema Design | `schema-` | CREATE/ALTER TABLE, types, constraints, migrations |
+   | Concurrency & Locking | `lock-` | transactions, row locks, UPDATE contention, queues |
+   | Data Access Patterns | `data-` | loops issuing queries, bulk writes, pagination |
 
-3. **Read the matching rule files** in `references/` (e.g. a new foreign key → `schema-foreign-key-indexes.md`; a query in a loop → `data-n-plus-one.md`). Read every rule in an applicable category, not just the obvious one — adjacent rules often catch subtler issues.
+   Categories are navigation, not a severity ranking: each rule carries its own impact level (CRITICAL / HIGH / MEDIUM-HIGH) in its frontmatter, and that per-rule impact — not the category — decides how much scrutiny a finding deserves and how findings are ordered. Lower-traffic categories contain CRITICAL rules (e.g. `lock-lost-updates`).
+
+3. **Read the matching rule files** in `references/`. Filenames state their topic — start with the rules whose names match what the change touches (a new foreign key → `schema-foreign-key-indexes.md`; a query in a loop → `data-n-plus-one.md`), then skim the remaining filenames in each applicable category for adjacent traps. Read a whole category only when the change is broad (a new table, a new query path), not for a one-line query tweak.
 
 4. **Check the change against each rule.** A finding must match the rule's "Incorrect" pattern in substance, not just superficially. Do not report speculative issues on code the diff doesn't touch.
 
@@ -48,7 +50,7 @@ Run this review when the change under review touches:
 
    If nothing violates the rules, say so explicitly rather than inventing low-value findings. For CRITICAL findings, suggest verifying with `explain (analyze, buffers)` against realistic data when practical.
 
-6. **End with a coverage footer.** After the findings, list every category from the table in step 2 with exactly one status: `N findings`, `checked — no findings`, or `N/A (reason it does not apply to this change)`. This makes "reviewed and clean" distinguishable from "not reviewed" — never silently skip a category.
+6. **End with a coverage footer.** After the findings, give every category from the table in step 2 exactly one status: `N findings`, `checked — no findings`, or `N/A (reason it does not apply to this change)`. This makes "reviewed and clean" distinguishable from "not reviewed" — never silently skip a category. For a small diff where most categories obviously don't apply, compress it to one line (e.g. `query: 1 finding; others: N/A — diff touches a single SELECT`).
 
 ## Notes
 

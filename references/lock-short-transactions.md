@@ -1,7 +1,7 @@
 ---
 title: Keep Transactions Short to Reduce Lock Contention
 impact: MEDIUM-HIGH
-impactDescription: 3-5x throughput improvement, fewer deadlocks
+impactDescription: locks held for milliseconds instead of the whole request; fewer deadlocks
 tags: transactions, locking, contention, performance
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Use Partial Indexes for Filtered Queries
 impact: HIGH
-impactDescription: 5-20x smaller indexes, faster writes and queries
+impactDescription: index covers only the rows queries touch — smaller and cheaper to maintain
 tags: indexes, partial-index, query-optimization, storage
 ---
 

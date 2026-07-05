@@ -1,7 +1,7 @@
 ---
 title: Choose the Right Index Type for Your Data
 impact: HIGH
-impactDescription: 10-100x improvement with correct index type
+impactDescription: the wrong index type cannot serve the operator and is simply not used
 tags: indexes, btree, gin, gist, brin, hash, index-types
 ---
 

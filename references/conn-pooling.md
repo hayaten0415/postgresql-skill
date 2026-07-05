@@ -1,7 +1,7 @@
 ---
 title: Use Connection Pooling for All Applications
 impact: CRITICAL
-impactDescription: Handle 10-100x more concurrent users
+impactDescription: a small shared pool serves load that would otherwise exhaust connections and memory
 tags: connection-pooling, pgbouncer, performance, scalability
 ---
 
@@ -26,11 +26,13 @@ select count(*) from pg_stat_activity;  -- 487 connections!
 -- Use a pooler like PgBouncer between app and database
 -- Application connects to pooler, pooler reuses a small pool to Postgres
 
--- Configure pool_size based on: (CPU cores * 2) + spindle_count
--- Example for 4 cores: pool_size = 10
+-- Start with pool_size near the database server's CPU core count
+-- (somewhat higher if queries spend time waiting on I/O or locks),
+-- then tune under a realistic load test — bigger is not better
+-- Example for 8 cores: pool_size = 8-16
 
--- Result: 500 concurrent users share 10 actual connections
-select count(*) from pg_stat_activity;  -- 10 connections
+-- Result: 500 concurrent users share ~10 actual connections
+select count(*) from pg_stat_activity;  -- ~10 connections
 ```
 
 Pool modes:

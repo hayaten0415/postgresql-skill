@@ -1,7 +1,7 @@
 ---
 title: Optimize RLS Policies for Performance
 impact: HIGH
-impactDescription: 5-10x faster RLS queries with proper patterns
+impactDescription: policy expression evaluated once per query instead of once per row
 tags: rls, performance, security, optimization
 ---
 
@@ -26,7 +26,7 @@ create policy orders_policy on orders
   using ((select current_setting('app.current_user_id')::bigint) = user_id);
   -- InitPlan: evaluated once, result reused for the whole scan
 
--- 100x+ faster on large tables
+-- the per-row evaluation overhead disappears on large tables
 ```
 
 The same wrap-in-`select` trick applies to platform identity functions on

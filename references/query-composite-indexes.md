@@ -1,7 +1,7 @@
 ---
 title: Create Composite Indexes for Multi-Column Queries
 impact: HIGH
-impactDescription: 5-10x faster multi-column queries
+impactDescription: one index scan instead of combining separate per-column indexes
 tags: indexes, composite-index, multi-column, query-optimization
 ---
 

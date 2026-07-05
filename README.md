@@ -26,9 +26,12 @@ Then ask Claude Code to review a migration, schema, or query diff.
 
 ## Checks
 
-`python3 tests/check_skill.py` validates rule-file structure (frontmatter keys,
-impact enum, naming, example blocks). `tests/trigger_cases.yaml` lists prompts
-and which skill should fire when a generation skill is installed alongside.
+`python3 tests/check_skill.py` is a **structure lint only**: it validates
+frontmatter keys, the impact enum, filename prefixes, and the presence of
+Incorrect/Correct/Reference blocks. It does not verify that rule content is
+technically correct — that requires human review. `tests/trigger_cases.yaml` is
+a manual verification spec (prompts and which skill should fire when a
+generation skill is installed alongside), not an executed test.
 
 ## Attribution
 

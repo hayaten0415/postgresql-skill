@@ -1,7 +1,7 @@
 ---
 title: Choose Appropriate Data Types
 impact: HIGH
-impactDescription: 50% storage reduction, faster comparisons
+impactDescription: smaller rows, faster comparisons, fewer type-related bugs
 tags: data-types, schema, storage, performance
 ---
 

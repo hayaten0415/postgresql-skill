@@ -1,7 +1,7 @@
 ---
 title: Batch INSERT Statements for Bulk Data
 impact: MEDIUM-HIGH
-impactDescription: 10-50x faster bulk writes (write-side N+1)
+impactDescription: one round trip and one commit instead of one per row (write-side N+1)
 tags: batch, insert, bulk, performance, copy
 ---
 

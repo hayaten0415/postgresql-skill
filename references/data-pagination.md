@@ -1,50 +1,54 @@
 ---
 title: Use Cursor-Based Pagination Instead of OFFSET
 impact: MEDIUM-HIGH
-impactDescription: Consistent O(1) performance regardless of page depth
+impactDescription: page depth stops affecting cost — OFFSET reads and discards every skipped row
 tags: pagination, cursor, keyset, offset, performance
 ---
 
 ## Use Cursor-Based Pagination Instead of OFFSET
 
-OFFSET-based pagination scans all skipped rows, getting slower on deeper pages. Cursor pagination is O(1).
+`offset` pagination reads and discards all skipped rows, so cost grows linearly
+with page depth. Keyset (cursor) pagination seeks the index directly to the last
+row the client saw, so every page costs roughly the same regardless of depth.
 
 **Incorrect (OFFSET pagination):**
 
 ```sql
--- Page 1: scans 20 rows
+-- Page 1: reads 20 rows
 select * from products order by id limit 20 offset 0;
 
--- Page 100: scans 2000 rows to skip 1980
-select * from products order by id limit 20 offset 1980;
-
--- Page 10000: scans 200,000 rows!
+-- Deep page: reads and discards 199,980 rows to return 20
 select * from products order by id limit 20 offset 199980;
 ```
 
 **Correct (cursor/keyset pagination):**
 
 ```sql
--- Page 1: get first 20
+-- First page
 select * from products order by id limit 20;
--- Application stores last_id = 20
+-- Application remembers the id of the last row it served
 
--- Page 2: start after last ID
-select * from products where id > 20 order by id limit 20;
--- Uses index, always fast regardless of page depth
-
--- Page 10000: same speed as page 1
-select * from products where id > 199980 order by id limit 20;
+-- Next page: seek past the remembered value via the index
+select * from products
+where id > $last_seen_id
+order by id
+limit 20;
 ```
 
-For multi-column sorting:
+For multi-column sorting, the cursor must include every sort column, with a
+unique column (e.g. `id`) last as a tie-breaker, and a matching composite index:
 
 ```sql
--- Cursor must include all sort columns
 select * from products
-where (created_at, id) > ('2024-01-15 10:00:00', 12345)
+where (created_at, id) > ($last_created_at, $last_id)
 order by created_at, id
 limit 20;
 ```
+
+Trade-off: keyset pagination only supports next/previous from a page you have
+already seen — there is no way to jump to "page 500" without counting rows, so
+numbered page links need `offset` (cap the depth) or a precomputed mapping.
+Deep OFFSET pages have a second defect anyway: rows inserted or deleted between
+requests shift the pages, so users see duplicates or gaps — a cursor is stable.
 
 Reference: [LIMIT and OFFSET](https://www.postgresql.org/docs/current/queries-limit.html)

@@ -1,7 +1,7 @@
 ---
 title: Index Foreign Key Columns
 impact: HIGH
-impactDescription: 10-100x faster JOINs and CASCADE operations
+impactDescription: joins and cascade deletes use an index instead of scanning the child table
 tags: foreign-key, indexes, joins, schema
 ---
 

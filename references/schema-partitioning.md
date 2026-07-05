@@ -1,7 +1,7 @@
 ---
 title: Partition Large Tables for Better Performance
 impact: MEDIUM-HIGH
-impactDescription: 5-20x faster queries and maintenance on large tables
+impactDescription: queries scan only matching partitions; old data drops instantly
 tags: partitioning, large-tables, time-series, performance
 ---
 
