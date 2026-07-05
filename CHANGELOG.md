@@ -27,6 +27,7 @@ Accuracy and design fixes from external review:
 Initial release, developed iteratively in one day (earlier internal
 versions 1.0.0–1.1.1 consolidated here): 36 review rules across 6
 categories, derived from supabase/agent-skills (MIT) and generalized for
-plain PostgreSQL, extended with original review rules grounded in
+plain PostgreSQL, extended with original review rules covering
+correctness traps, indexing, locking, and migration safety, grounded in
 the official PostgreSQL documentation. Review procedure with per-category
 coverage footer, structure lint, and trigger routing cases.
